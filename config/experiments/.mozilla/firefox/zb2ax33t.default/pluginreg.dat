@@ -1,0 +1,11 @@
+Generated File. Do not edit.
+
+[HEADER]
+Version:0.19t:$
+Arch:x86_64-gcc3:$
+
+[PLUGINS]
+
+[INVALID]
+/usr/lib64/IcedTeaPlugin.so:$
+1523423237000:$

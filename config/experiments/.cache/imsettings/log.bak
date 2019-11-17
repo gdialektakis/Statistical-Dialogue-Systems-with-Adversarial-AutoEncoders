@@ -1,0 +1,50 @@
+[ 1551180299.240007]: IMSettings-Daemon[6897]: INFO: Starting imsettings-daemon...
+[ 1551180299.240304]: IMSettings-Daemon[6897]: INFO:   [HOME=/home/flygerakis/.config/imsettings]
+[ 1551180299.240338]: IMSettings-Daemon[6897]: INFO:   [XINPUTRCDIR=/etc/X11/xinit/]
+[ 1551180299.240365]: IMSettings-Daemon[6897]: INFO:   [XINPUTDIR=/etc/X11/xinit/xinput.d/]
+
+[ 1551180299.240391]: IMSettings-Daemon[6897]: INFO:   [MODULEDIR=/usr/lib64/imsettings]
+
+[ 1551180299.240417]: IMSettings-Daemon[6897]: INFO:   [MODULES=gsettings, qt]
+
+imsettings information
+==========================
+XINPUTRC: /etc/X11/xinit/xinput.d//none.conf
+	  File: ‘/etc/X11/xinit/xinput.d//none.conf’
+	  Size: 110       	Blocks: 8          IO Block: 4096   regular file
+	Device: fd00h/64768d	Inode: 1209664     Links: 1
+	Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+	Context: system_u:object_r:bin_t:s0
+	Access: 2019-02-25 11:41:31.193446471 +0000
+	Modify: 2018-10-30 19:42:37.000000000 +0000
+	Change: 2019-01-15 17:18:16.735366572 +0000
+	 Birth: -
+Is DBus enabled: yes
+Is imsettings enabled: yes
+Is GTK+ supported: no
+Is Qt supported: yes
+DESKTOP: 1-kde-plasma-standard
+GUESS_DESKTOP: $GDMSESSION
+DISABLE_IMSETTINGS: 
+IMSETTINGS_DISABLE_DESKTOP_CHECK: 
+DBUS_SESSION_BUS_ADDRESS: unix:abstract=/tmp/dbus-vdVlIlieaq,guid=211ee35c96e708c2a413c4545c75220b
+GTK_IM_MODULE: gtk-im-context-simple
+QT_IM_MODULE: xim
+XMODIFIERS: @im=none
+IMSETTINGS_MODULE: none
+IMSETTINGS_INTEGRATE_DESKTOP: yes
+
+
+[ 1551180307.639002]: IMSettings-Qt backend[6897]: WARNING **: Unable to obtain the DefaultInputMethod: Key file does not have group “Qt”
+[ 1551180307.699204]: IMSettings-Daemon[6897]: INFO: Attempting to switch IM to none [lang=en_GB.UTF-8, update=false]
+[ 1551180307.765997]: IMSettings-Daemon[6897]: INFO:   no need to invoke any auxiliary process for none
+[ 1551180307.766101]: IMSettings-Daemon[6897]: INFO:   no need to invoke any main process for none
+[ 1551180307.767945]: IMSettings-Qt backend[6897]: INFO: Setting up xim as Qt immodule
+[ 1551180307.768237]: IMSettings-GSettings backend[6897]: INFO: Setting up gtk-im-context-simple:xim as gtk+ immodule
+[ 1551883308.168083]: IMSettings-Daemon[6897]: INFO: Release the ownership of com.redhat.imsettings
+
+
+[ 1551883308.172652]: GLib-GIO[6897]: CRITICAL **: Error while sending AddMatch() message: The connection is closed
+
+[ 1551883308.172749]: GLib-GIO[6897]: CRITICAL **: Error while sending AddMatch() message: The connection is closed
+[ 1551883308.172879]: IMSettings-Daemon[6897]: INFO: Unloading imesttings module: qt

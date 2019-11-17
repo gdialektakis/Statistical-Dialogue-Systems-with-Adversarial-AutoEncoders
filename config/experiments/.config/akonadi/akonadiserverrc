@@ -1,0 +1,12 @@
+[%General]
+Driver=QMYSQL
+
+[QMYSQL]
+Name=akonadi
+Host=
+Options="UNIX_SOCKET=/home/flygerakis/.local/share/akonadi/socket-cvg-pre11.crl.toshiba.co.uk/mysql.socket"
+ServerPath=/usr/libexec/mysqld
+StartServer=true
+
+[Debug]
+Tracer=null

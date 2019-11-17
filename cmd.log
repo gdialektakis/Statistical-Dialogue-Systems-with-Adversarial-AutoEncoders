@@ -1,0 +1,240 @@
+*** logfile: env1-sparse-gp-SFH-seed7051991-00.1-10.train.log ***
+RESULTS:: 16:09:51: root                                   pydial.py <train_command>816 :  List of domains: SFHotels
+*** Training Iteration env1-sparse-gp-SFH-00.0->env1-sparse-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+RESULTS:: 16:09:51: root                                      pydial.py <trainBatch>411 :  *** Training Iteration env1-sparse-gp-SFH-00.0->env1-sparse-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+2019-02-15 16:09:57.394542: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-02-15 16:09:57.845987: E tensorflow/core/common_runtime/direct_session.cc:158] Internal: failed initializing StreamExecutor for CUDA device ordinal 0: Internal: failed call to cuDevicePrimaryCtxRetain: CUDA_ERROR_OUT_OF_MEMORY; total memory reported: 34081079296
+ ERROR :: 16:09:57: root                              ContextLogger.py <_exceptHook>263 :  Uncaught exception: <class 'tensorflow.python.framework.errors_impl.InternalError'>( Failed to create session. )          Traceback (most recent call last):
+            File "pydial.py", line 1166, in <module>
+              run()
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+              add_verbosity_option=add_verbosity_option)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+              return function(*args[:len(required_args)], **kw)
+            File "pydial.py", line 817, in train_command
+              trainBatch(domain, configId, gtrainerrorrate, gtraindialogsperbatch, i, seed=seed)
+            File "pydial.py", line 450, in trainBatch
+              simulator = Simulate.SimulationSystem(error_rate=error)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Simulate.py", line 83, in __init__
+              self.agent_factory = Agent.AgentFactory(hub_id='simulate')
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 787, in __init__
+              self.init_agents(hub_id)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 801, in init_agents
+              self.agents['Smith'] = DialogueAgent(agent_id='Smith', hub_id=hub_id)  # primary agent, can be copied
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 139, in __init__
+              self.restart_agent(session_id=None)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 379, in restart_agent
+              self._hand_control(domainString=self.topic_tracker.operatingDomain, previousDomainString=None)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 456, in _hand_control
+              self._bootup(domainString, previousDomainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 486, in _bootup
+              self.policy_manager.bootup(domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 137, in bootup
+              self._load_domains_policy(domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 316, in _load_domains_policy
+              self.domainPolicies[domainString] = GPPolicy.GPPolicy(domainString, learning, self.shared_params,self.autoencoder)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 224, in __init__
+              self.singleAE = self.initSingleAutoEncoder(domainString, autoencoder_type)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 248, in initSingleAutoEncoder
+              variable_scope_name=domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/autoencoder/dense_sparse/model.py", line 76, in __init__
+              self.sess = tf.Session()
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1494, in __init__
+              super(Session, self).__init__(target, graph, config=config)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 626, in __init__
+              self._session = tf_session.TF_NewSession(self._graph._c_graph, opts)
+          InternalError: Failed to create session.
+          
+Traceback (most recent call last):
+  File "pydial.py", line 1166, in <module>
+    run()
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+    add_verbosity_option=add_verbosity_option)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+    return function(*args[:len(required_args)], **kw)
+  File "pydial.py", line 817, in train_command
+    trainBatch(domain, configId, gtrainerrorrate, gtraindialogsperbatch, i, seed=seed)
+  File "pydial.py", line 450, in trainBatch
+    simulator = Simulate.SimulationSystem(error_rate=error)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Simulate.py", line 83, in __init__
+    self.agent_factory = Agent.AgentFactory(hub_id='simulate')
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 787, in __init__
+    self.init_agents(hub_id)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 801, in init_agents
+    self.agents['Smith'] = DialogueAgent(agent_id='Smith', hub_id=hub_id)  # primary agent, can be copied
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 139, in __init__
+    self.restart_agent(session_id=None)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 379, in restart_agent
+    self._hand_control(domainString=self.topic_tracker.operatingDomain, previousDomainString=None)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 456, in _hand_control
+    self._bootup(domainString, previousDomainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 486, in _bootup
+    self.policy_manager.bootup(domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 137, in bootup
+    self._load_domains_policy(domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 316, in _load_domains_policy
+    self.domainPolicies[domainString] = GPPolicy.GPPolicy(domainString, learning, self.shared_params,self.autoencoder)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 224, in __init__
+    self.singleAE = self.initSingleAutoEncoder(domainString, autoencoder_type)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 248, in initSingleAutoEncoder
+    variable_scope_name=domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/autoencoder/dense_sparse/model.py", line 76, in __init__
+    self.sess = tf.Session()
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1494, in __init__
+    super(Session, self).__init__(target, graph, config=config)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 626, in __init__
+    self._session = tf_session.TF_NewSession(self._graph._c_graph, opts)
+tensorflow.python.framework.errors_impl.InternalError: Failed to create session.
+*** logfile: env1-sparse-gp-SFH-seed7051991-00.1-10.train.log ***
+RESULTS:: 16:09:58: root                                   pydial.py <train_command>816 :  List of domains: SFHotels
+*** Training Iteration env1-sparse-gp-SFH-00.0->env1-sparse-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+RESULTS:: 16:09:58: root                                      pydial.py <trainBatch>411 :  *** Training Iteration env1-sparse-gp-SFH-00.0->env1-sparse-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+2019-02-15 16:10:04.102627: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-02-15 16:10:04.532602: E tensorflow/core/common_runtime/direct_session.cc:158] Internal: failed initializing StreamExecutor for CUDA device ordinal 0: Internal: failed call to cuDevicePrimaryCtxRetain: CUDA_ERROR_OUT_OF_MEMORY; total memory reported: 34081079296
+ ERROR :: 16:10:04: root                              ContextLogger.py <_exceptHook>263 :  Uncaught exception: <class 'tensorflow.python.framework.errors_impl.InternalError'>( Failed to create session. )          Traceback (most recent call last):
+            File "pydial.py", line 1166, in <module>
+              run()
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+              add_verbosity_option=add_verbosity_option)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+              return function(*args[:len(required_args)], **kw)
+            File "pydial.py", line 817, in train_command
+              trainBatch(domain, configId, gtrainerrorrate, gtraindialogsperbatch, i, seed=seed)
+            File "pydial.py", line 450, in trainBatch
+              simulator = Simulate.SimulationSystem(error_rate=error)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Simulate.py", line 83, in __init__
+              self.agent_factory = Agent.AgentFactory(hub_id='simulate')
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 787, in __init__
+              self.init_agents(hub_id)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 801, in init_agents
+              self.agents['Smith'] = DialogueAgent(agent_id='Smith', hub_id=hub_id)  # primary agent, can be copied
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 139, in __init__
+              self.restart_agent(session_id=None)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 379, in restart_agent
+              self._hand_control(domainString=self.topic_tracker.operatingDomain, previousDomainString=None)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 456, in _hand_control
+              self._bootup(domainString, previousDomainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 486, in _bootup
+              self.policy_manager.bootup(domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 137, in bootup
+              self._load_domains_policy(domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 316, in _load_domains_policy
+              self.domainPolicies[domainString] = GPPolicy.GPPolicy(domainString, learning, self.shared_params,self.autoencoder)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 224, in __init__
+              self.singleAE = self.initSingleAutoEncoder(domainString, autoencoder_type)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 248, in initSingleAutoEncoder
+              variable_scope_name=domainString)
+            File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/autoencoder/dense_sparse/model.py", line 76, in __init__
+              self.sess = tf.Session()
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1494, in __init__
+              super(Session, self).__init__(target, graph, config=config)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 626, in __init__
+              self._session = tf_session.TF_NewSession(self._graph._c_graph, opts)
+          InternalError: Failed to create session.
+          
+Traceback (most recent call last):
+  File "pydial.py", line 1166, in <module>
+    run()
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+    add_verbosity_option=add_verbosity_option)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+    return function(*args[:len(required_args)], **kw)
+  File "pydial.py", line 817, in train_command
+    trainBatch(domain, configId, gtrainerrorrate, gtraindialogsperbatch, i, seed=seed)
+  File "pydial.py", line 450, in trainBatch
+    simulator = Simulate.SimulationSystem(error_rate=error)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Simulate.py", line 83, in __init__
+    self.agent_factory = Agent.AgentFactory(hub_id='simulate')
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 787, in __init__
+    self.init_agents(hub_id)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 801, in init_agents
+    self.agents['Smith'] = DialogueAgent(agent_id='Smith', hub_id=hub_id)  # primary agent, can be copied
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 139, in __init__
+    self.restart_agent(session_id=None)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 379, in restart_agent
+    self._hand_control(domainString=self.topic_tracker.operatingDomain, previousDomainString=None)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 456, in _hand_control
+    self._bootup(domainString, previousDomainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/Agent.py", line 486, in _bootup
+    self.policy_manager.bootup(domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 137, in bootup
+    self._load_domains_policy(domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/PolicyManager.py", line 316, in _load_domains_policy
+    self.domainPolicies[domainString] = GPPolicy.GPPolicy(domainString, learning, self.shared_params,self.autoencoder)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 224, in __init__
+    self.singleAE = self.initSingleAutoEncoder(domainString, autoencoder_type)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/policy/GPPolicy.py", line 248, in initSingleAutoEncoder
+    variable_scope_name=domainString)
+  File "/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/autoencoder/dense_sparse/model.py", line 76, in __init__
+    self.sess = tf.Session()
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 1494, in __init__
+    super(Session, self).__init__(target, graph, config=config)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/tensorflow/python/client/session.py", line 626, in __init__
+    self._session = tf_session.TF_NewSession(self._graph._c_graph, opts)
+tensorflow.python.framework.errors_impl.InternalError: Failed to create session.
+*** logfile: env1-fullBS-gp-SFH-seed7051991-00.1-10.train.log ***
+RESULTS:: 16:10:05: root                                   pydial.py <train_command>816 :  List of domains: SFHotels
+*** Training Iteration env1-fullBS-gp-SFH-00.0->env1-fullBS-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+RESULTS:: 16:10:05: root                                      pydial.py <trainBatch>411 :  *** Training Iteration env1-fullBS-gp-SFH-00.0->env1-fullBS-gp-SFH-00.1: iter=0, error-rate=0, num-dialogs=300 ***
+savePolicyInc
+savePolicyInc
+savePolicyInc
+RESULTS:: 16:24:12: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFHotels --evaluated by: objective success evaluator
+RESULTS:: 16:24:12: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 300
+RESULTS:: 16:24:12: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 2.79 +- 1.30
+RESULTS:: 16:24:12: root                               EvaluationManager.py <_prstr>179 :  Average success = 83.33 +- 4.23
+RESULTS:: 16:24:12: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 13.87 +- 0.77
+*** Evaluating env1-fullBS-gp-SFH-00.1: error-rate=0 num-dialogs=150 ***
+RESULTS:: 16:24:15: root                                   pydial.py <setEvalConfig>473 :  *** Evaluating env1-fullBS-gp-SFH-00.1: error-rate=0 num-dialogs=150 ***
+RESULTS:: 16:29:11: root                               EvaluationManager.py <_prstr>179 :  Results for domain: SFHotels --evaluated by: objective success evaluator
+RESULTS:: 16:29:11: root                               EvaluationManager.py <_prstr>179 :  # of dialogues  = 150
+RESULTS:: 16:29:11: root                               EvaluationManager.py <_prstr>179 :  Average reward  = 5.77 +- 1.74
+RESULTS:: 16:29:11: root                               EvaluationManager.py <_prstr>179 :  Average success = 78.67 +- 6.61
+RESULTS:: 16:29:11: root                               EvaluationManager.py <_prstr>179 :  Average turns   = 9.97 +- 0.76
+RESULTS:: 16:29:11: root                                   pydial.py <train_command>816 :  List of domains: SFHotels
+*** Training Iteration env1-fullBS-gp-SFH-00.1->env1-fullBS-gp-SFH-00.2: iter=1, error-rate=0, num-dialogs=300 ***
+RESULTS:: 16:29:11: root                                      pydial.py <trainBatch>411 :  *** Training Iteration env1-fullBS-gp-SFH-00.1->env1-fullBS-gp-SFH-00.2: iter=1, error-rate=0, num-dialogs=300 ***
+ ERROR :: 16:29:12: root                       FlatOntologyManager.py <_set_ontology>97 :  No such file or directory: /rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/ontology/ontologies/SFHotels-rules.json. Probably <Settings.root> is not set/set wrong by config.
+Command Aborted - see Log file for error: env1-fullBS-gp-SFH-seed7051991-00.1-10.train.log
+*** logfile: env1-fullBS-gp-CH-seed7051991-00.1-10.train.log ***
+ ERROR :: 16:29:14: root                              ContextLogger.py <_exceptHook>263 :  Uncaught exception: <type 'exceptions.IOError'>( [Errno 13] Permission denied: '/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/_benchmarklogs/experiments/focus/env1-fullBS-gp-CH-seed7051991-00.1-10.train.log' )          Traceback (most recent call last):
+            File "pydial.py", line 1166, in <module>
+              run()
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+              add_verbosity_option=add_verbosity_option)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+              return function(*args[:len(required_args)], **kw)
+            File "pydial.py", line 812, in train_command
+              traindomains=traindomains, dbprefix=dbprefix, testerrorrate=testerrorrate)
+            File "pydial.py", line 362, in initialise
+              ContextLogger.createLoggingHandlers(config=Settings.config)
+            File "utils/ContextLogger.py", line 222, in createLoggingHandlers
+              fh = logging.FileHandler(log_file, mode=file_mode)
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/logging/__init__.py", line 913, in __init__
+              StreamHandler.__init__(self, self._open())
+            File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/logging/__init__.py", line 943, in _open
+              stream = open(self.baseFilename, self.mode)
+          IOError: [Errno 13] Permission denied: '/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/_benchmarklogs/experiments/focus/env1-fullBS-gp-CH-seed7051991-00.1-10.train.log'
+          
+Traceback (most recent call last):
+  File "pydial.py", line 1166, in <module>
+    run()
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 196, in autocmds
+    add_verbosity_option=add_verbosity_option)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/site-packages/scriptine/command.py", line 105, in parse_and_run_function
+    return function(*args[:len(required_args)], **kw)
+  File "pydial.py", line 812, in train_command
+    traindomains=traindomains, dbprefix=dbprefix, testerrorrate=testerrorrate)
+  File "pydial.py", line 362, in initialise
+    ContextLogger.createLoggingHandlers(config=Settings.config)
+  File "utils/ContextLogger.py", line 222, in createLoggingHandlers
+    fh = logging.FileHandler(log_file, mode=file_mode)
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/logging/__init__.py", line 913, in __init__
+    StreamHandler.__init__(self, self._open())
+  File "/rmt/conda/miniconda2/envs/fotios-intel-p27-V4-GPU/lib/python2.7/logging/__init__.py", line 943, in _open
+    stream = open(self.baseFilename, self.mode)
+IOError: [Errno 13] Permission denied: '/rmt/dialogue/Margarita/Fotios_2019/home/pydial_dbug/_benchmarklogs/experiments/focus/env1-fullBS-gp-CH-seed7051991-00.1-10.train.log'

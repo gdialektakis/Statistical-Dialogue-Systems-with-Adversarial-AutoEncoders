@@ -1,0 +1,6 @@
+[Data]
+Method=UnixPath
+UnixPath=/home/flygerakis/.local/share/akonadi/socket-cvg-pre11.crl.toshiba.co.uk/akonadiserver.socket
+
+[DBUS]
+Address="unix:abstract=/tmp/dbus-ESYxxyKriD,guid=5dbc4bc166ee91014020ae515c800c6f"
