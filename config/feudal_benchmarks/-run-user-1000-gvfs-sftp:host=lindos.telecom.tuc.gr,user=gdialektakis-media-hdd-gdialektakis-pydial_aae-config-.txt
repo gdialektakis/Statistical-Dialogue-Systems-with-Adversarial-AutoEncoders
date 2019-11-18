@@ -1,0 +1,1 @@
+/run/user/1000/gvfs/sftp:host=lindos.telecom.tuc.gr,user=gdialektakis/media/hdd/gdialektakis/pydial_aae/config/feudal_benchmarks/env1-Feudal-CR.cfg
