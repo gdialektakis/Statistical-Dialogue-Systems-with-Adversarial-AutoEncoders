@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/pydial_dae.iml" filepath="$PROJECT_DIR$/.idea/pydial_dae.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pydial_aae.iml" filepath="$PROJECT_DIR$/.idea/pydial_aae.iml" />
     </modules>
   </component>
 </project>

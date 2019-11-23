@@ -96,7 +96,7 @@ class Autoencoder(object):
             for domain in self.domains:
                 # projection layer: projects domain layers to projection layer
                 get_weight_variable('W_project_' + domain, (self.state_dim[domain], self.project_dim))
-            # todo: fix here the dimensio of decoder
+            # todo: fix here the dimension of decoder
             width = self.project_dim
             for domain in self.domains:
                 get_weight_variable('W_' + domain, (width, self.layers_shape[1]))
@@ -128,7 +128,7 @@ class Autoencoder(object):
 
         # we usually don't directly compute the stddev sigma, but the log of the stddev instead, which is log(sigma)
         # the reasoning is similar to why we use softmax, instead of direct outputting numbers in fixed range [0, 1],
-        # the networ can output a wider range of numbers which can later compress down
+        # the network can output a wider range of numbers which can later compress down
         W = get_weight_variable('W' + "stddev")
         log_stddev = tf.nn.dropout(tf.nn.tanh(tf.matmul(Y, W)), keep_prob=self.prob)
 
@@ -211,7 +211,7 @@ class Autoencoder(object):
         # we sample from the standard normal a matrix of batch_size*latent_size(taking into account minibatches)
         std_norm = tf.random_normal(shape=(tf.shape(mean)[0], self.latent_size), mean=0, stddev=1)
         # sampling from Z~N(mu, sigma^2) is the same as sampling from mu + sigma*X, X~N(0,1)
-        return mean + tf.exp(log_stddev) * std_norm
+        return mean + tf.exp(log_stddev) * std_norm   #
 
     def train(self, input_x, clean_input_x):
         if self.trainable:

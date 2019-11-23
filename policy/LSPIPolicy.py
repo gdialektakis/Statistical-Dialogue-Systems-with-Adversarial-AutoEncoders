@@ -216,7 +216,7 @@ class LSPIPolicy(Policy,PolicyCommittee.CommitteeMember):
         else:
             from autoencoder.dense_multi.model import Autoencoder
 
-        single_autoencoder = Autoencoder(domainString=domainString, policyType="gp",
+        single_autoencoder = Autoencoder(domainString=domainString, policyType="lspi",
                                          variable_scope_name=domainString)
         return single_autoencoder
 
@@ -798,6 +798,8 @@ class LSPIState(State):
                 # Fotis
                 self.flatBeliefVec = np.array(flatten_belief(belief, domainUtil), dtype=np.float32)
                 self.beliefStateVec = autoencoder.encode(self.flatBeliefVec.reshape((1, -1))).reshape((-1,))
+                self.hello = True
+
                 # End of modifications
 
     def extractBeliefWithOther(self, belief, sort=True):
@@ -927,6 +929,7 @@ class LSPIState(State):
         self.state_size = len(self._bstate)
         # Tom's speedup: convert belief dict to numpy vector
         self.beliefStateVec = self.slowToFastBelief(self._bstate)
+        self.myname = True
 
     def slowToFastBelief(self, bdic):
         '''Converts dictionary format to numpy vector format

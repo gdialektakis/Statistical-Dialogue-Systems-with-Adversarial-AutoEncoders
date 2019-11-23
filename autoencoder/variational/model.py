@@ -92,7 +92,7 @@ class Autoencoder(object):
             for domain in self.domains:
                 # projection layer: projects domain layers to projection layer
                 get_weight_variable('W_project_' + domain, (self.state_dim[domain], self.project_dim))
-            # todo: fix here the dimensio of decoder
+            # todo: fix here the dimension of decoder
             width = self.project_dim
             for domain in self.domains:
                 get_weight_variable('W_' + domain, (width, self.layers_shape[1]))

@@ -391,7 +391,7 @@ class PolicyManager(object):
 #                 policy = SelectPolicy.SelectPolicy(use_confreq=useconfreq)
 #             elif policy_type == 'nn':
 #                 from policy import NNPolicy
-#                 # TODO - further change here - train is now implmented in config file. below needs updating 
+#                 # TODO - further change here - train is now impelmented in config file. below needs updating
 #                 policy = NNPolicy.NNPolicy(use_confreq=useconfreq, is_training=train)           
             #------------------------------
         return
