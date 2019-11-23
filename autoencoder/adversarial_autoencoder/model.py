@@ -16,3 +16,21 @@ from lib.optimizers import get_learning_rate, get_optimizer
 from lib.precision import _FLOATX
 import numpy as np
 import csv
+
+def get_weight_variable(name, shape=None, initializer=tf.contrib.layers.xavier_initializer_conv2d()):
+    if shape is None:
+        return tf.get_variable(name)
+    else:
+        return tf.get_variable(name, shape=shape, dtype=_FLOATX, initializer=initializer)
+
+
+def get_bias_variable(name, shape=None, initializer=tf.constant_initializer(value=0.0, dtype=_FLOATX)):
+    if shape is None:
+        return tf.get_variable(name)
+    else:
+        return tf.get_variable(name, shape=shape, dtype=_FLOATX, initializer=initializer)
+
+
+"""
+Adversarial Autoencoder
+"""
