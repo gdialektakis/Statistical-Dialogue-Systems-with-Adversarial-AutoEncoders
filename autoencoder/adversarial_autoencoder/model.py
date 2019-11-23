@@ -65,7 +65,7 @@ class Autoencoder(object):
         setup_logger('msg_logger', cfg['msg_logging_dir'], level=logging.INFO)
 
         """
-            Find where to close the Session
+        Find where to close the Session
         """
         self.sess = tf.Session()
         # device = self.get_tensorflow_device()
