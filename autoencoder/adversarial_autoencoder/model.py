@@ -83,7 +83,6 @@ class Autoencoder(object):
                     pass
 
 
-
     def load_learning_rate(self, dstring, learning_rate_params):
         with open(dstring + '_aae_learning_rate_logs.csv', 'r+') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
@@ -99,10 +98,60 @@ class Autoencoder(object):
         return learning_rate_params
 
     def create_variables(self):
+        for domain in self.domains:
+            get_weight_variable('W_' + domain, (self.state_dim[domain], self.layers_shape[1]))
+
+        for i in range(1, self.n_layers):
+            get_weight_variable('W' + str(i), (self.layers_shape[i], self.layers_shape[i + 1]))
+
+
+    def encoder(self, X):
+        W = get_weight_variable('W_' + self.domainString)
+        Y = tf.nn.tanh(tf.matmul(X, W))
+        Y = tf.nn.dropout(Y, keep_prob=self.prob)
+
+        for i in range(1, self.n_layers - 1):
+            W = get_weight_variable('W' + str(i))
+            Y = tf.nn.tanh(tf.matmul(Y, W))
+
+            Y = tf.nn.dropout(Y, keep_prob=self.prob)
+
+        return Y
+
+
+    def decoder(self, Y):
+        X = Y
+        for i in range(self.n_layers - 1, 0, -1):
+            W = get_weight_variable('W' + str(i))
+            X = tf.nn.tanh(tf.matmul(X, tf.transpose(W)))
+            # X = tf.nn.tanh(tf.matmul(X, W))
+
+        W = get_weight_variable('W_' + self.domainString)
+        X = tf.nn.tanh(tf.matmul(X, tf.transpose(W)))
+
+        return X
+
+    def discriminator(X):
         pass
 
     def define_operations(self):
-        pass
+        self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
+        self.prob = tf.placeholder_with_default(1.0, shape=())
+
+        self.X_encoded = self.encoder(self.X_data_placeholder)
+        X_reconstructed = self.decoder(self.X_encoded)  # Network prediction
+
+        # Create a scalar summary object for the encoder and decoder so it can be displayed
+        self.tf_encode_summary = tf.summary.scalar('loss', self.X_encoded)
+        self.tf_decode_summary = tf.summary.scalar('loss', X_reconstructed)
+
+        # Autoencoder loss
+        self.train_loss = tf.reduce_mean(tf.pow(self.X_data_placeholder - X_reconstructed, 2))
+
+
 
     def restore_variables(self):
         pass
+
+
+
