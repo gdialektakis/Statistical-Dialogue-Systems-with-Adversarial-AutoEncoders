@@ -13,7 +13,7 @@ __author__ = """Vassilis Tsiaras (tsiaras@csd.uoc.gr)"""
 #    Computer Science Department, University of Crete.
 
 def get_configuration(domainString, policyType):
-    config_filename = os.path.join('.', 'autoencoder', 'config', 'config_params_aae.json')
+    config_filename = os.path.join('.', 'autoencoder', 'config', '   "latent_size"            : 30,.json')
     with open(config_filename, 'r') as f:
         cfg = json.load(f)
 
@@ -25,6 +25,7 @@ def get_configuration(domainString, policyType):
     cfg['input_dim'] = int(cfg['state_dim'][domainString])
     if not cfg['multi_domain']:
         cfg['layers_shape'][0] = int(cfg['state_dim'][domainString])
+        cfg['discriminator_layers'][0] = int(cfg['layers_shape'][-1])
 
     cfg['msg_logging_dir'] = os.path.join('.', cfg['base_dir'], cfg['logging_dir'],
                                           'log_' + str(cfg['model_id']) + '.txt')

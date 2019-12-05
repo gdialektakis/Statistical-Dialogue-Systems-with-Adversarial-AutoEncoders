@@ -30,10 +30,26 @@ def get_bias_variable(name, shape=None, initializer=tf.constant_initializer(valu
     else:
         return tf.get_variable(name, shape=shape, dtype=_FLOATX, initializer=initializer)
 
+def dense(x, n1, n2, name):
+        """
+        Used to create a dense layer.
+        :param x: input tensor to the dense layer
+        :param n1: no. of input neurons
+        :param n2: no. of output neurons
+        :param name: name of the entire dense layer.i.e, variable scope name.
+        :return: tensor with shape [batch_size, n2]
+        """
+        with tf.variable_scope(name, reuse=None):
+            weights = tf.get_variable("weights", shape=[n1, n2],
+                                      initializer=tf.random_normal_initializer(mean=0., stddev=0.01))
+            out = tf.matmul(x, weights)
+            return out
+
 
 """
 Adversarial Autoencoder
 """
+
 
 class Autoencoder(object):
     def __init__(self,domainString, policyType, variable_scope_name):
@@ -54,8 +70,8 @@ class Autoencoder(object):
         self.dropout_rate = cfg['dropout_rate']
         self.epochs = cfg['epochs']
         self.trainable = cfg['trainable']
-        # variational
-        self.latent_size = cfg["latent_size"]
+        #discriminator model
+        self.discr_layers_shape = cfg['discriminator_layers']
 
         try:
             self.learning_rate_params = self.load_learning_rate(domainString, self.learning_rate_params)
@@ -105,34 +121,67 @@ class Autoencoder(object):
             get_weight_variable('W' + str(i), (self.layers_shape[i], self.layers_shape[i + 1]))
 
 
-    def encoder(self, X):
-        W = get_weight_variable('W_' + self.domainString)
-        Y = tf.nn.tanh(tf.matmul(X, W))
-        Y = tf.nn.dropout(Y, keep_prob=self.prob)
+    def encoder(self, X, reuse=False):
+        """
+        Encode part of the autoencoder.
+        :param x: input to the autoencoder
+        :param reuse: True -> Reuse the encoder variables, False -> Create or search of variables before creating
+        :return: tensor which is the hidden latent variable of the autoencoder.
+        """
+        with tf.variable_scope("Encoder", reuse=tf.AUTO_REUSE):
+            # W = get_weight_variable('W_' + self.domainString)
+            # Y = tf.nn.tanh(tf.matmul(X, W))
+            #
+            # Y = tf.nn.dropout(Y, keep_prob=self.prob)
 
-        for i in range(1, self.n_layers - 1):
-            W = get_weight_variable('W' + str(i))
-            Y = tf.nn.tanh(tf.matmul(Y, W))
+            if self.n_layers == 3:
+                input_layer = tf.nn.tanh(dense(X, self.input_dim, self.layers_shape[1], 'e_input_layer'))
+                input_layer = tf.nn.dropout(input_layer, keep_prob=self.prob)
+                e_dense1 = tf.nn.tanh(dense(input_layer, self.layers_shape[1], self.layers_shape[2], 'e_dense1'))
+                e_dense1 = tf.nn.dropout(e_dense1, keep_prob=self.prob)
+                e_dense2 = tf.nn.tanh(dense(e_dense1, self.layers_shape[2], self.layers_shape[3], 'e_dense2'))
+                e_dense2 = tf.nn.dropout(e_dense2, keep_prob=self.prob)
+                latent_variable = tf.nn.tanh(dense(e_dense2, self.layers_shape[3], self.layers_shape[4], 'e_latent_variable'))
+                latent_variable = tf.nn.dropout(latent_variable, keep_prob=self.prob)
 
-            Y = tf.nn.dropout(Y, keep_prob=self.prob)
-
-        return Y
+            return latent_variable
 
 
-    def decoder(self, Y):
-        X = Y
-        for i in range(self.n_layers - 1, 0, -1):
-            W = get_weight_variable('W' + str(i))
-            X = tf.nn.tanh(tf.matmul(X, tf.transpose(W)))
-            # X = tf.nn.tanh(tf.matmul(X, W))
+    def decoder(self, Y, reuse=False):
+        """
+        Decoder part of the autoencoder.
+        :param x: input to the decoder
+        :param reuse: True -> Reuse the decoder variables, False -> Create or search of variables before creating
+        :return: tensor which should ideally be the input given to the encoder.
+        """
 
-        W = get_weight_variable('W_' + self.domainString)
-        X = tf.nn.tanh(tf.matmul(X, tf.transpose(W)))
+        with tf.variable_scope("Decoder", reuse=tf.AUTO_REUSE):
+            X = Y
+            if self.n_layers == 3:
+                d_dense1 = tf.nn.tanh(dense(X, self.layers_shape[4], self.layers_shape[3], 'd_dense1'))
+                d_dense2 = tf.nn.tanh(dense(d_dense1, self.layers_shape[3], self.layers_shape[2], 'd_dense2'))
+                d_dense3 = tf.nn.tanh(dense(d_dense2, self.layers_shape[2], self.layers_shape[1], 'd_dense3'))
+                output = tf.nn.tanh(dense(d_dense3, self.layers_shape[1], self.input_dim, 'd_output'))
 
-        return X
+            return output
 
-    def discriminator(X):
-        pass
+
+    def discriminator(self, X, reuse=False):
+        """
+        Discriminator that is used to match the posterior distribution with a given prior distribution.
+        :param x: tensor of shape [batch_size, z_dim]
+        :param reuse: True -> Reuse the discriminator variables,
+                      False -> Create or search of variables before creating
+        :return: tensor of shape [batch_size, 1]
+        """
+
+        with tf.variable_scope("Discriminator", reuse=tf.AUTO_REUSE):
+            dc_den1 = tf.nn.relu(dense(X, self.layers_shape[-1], self.discr_layers_shape[1], name='dc_den1'))
+            dc_den2 = tf.nn.relu(dense(dc_den1, self.discr_layers_shape[1], self.discr_layers_shape[2], name='dc_den2'))
+            dc_den3 = tf.nn.relu(dense(dc_den2, self.discr_layers_shape[2], self.discr_layers_shape[3], name='dc_den3'))
+            output = dense(dc_den3, self.discr_layers_shape[3], 1, name='dc_output')
+
+            return output
 
     def define_operations(self):
         self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
