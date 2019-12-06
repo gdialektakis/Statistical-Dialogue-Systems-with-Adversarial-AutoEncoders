@@ -87,7 +87,7 @@ class Autoencoder(object):
         # device = self.get_tensorflow_device()
         # with tf.device(device):
         with tf.variable_scope("autoencoder_" + variable_scope_name, reuse=tf.AUTO_REUSE):
-            self.create_variables()
+            #self.create_variables()
             self.define_operations()
 
             if cfg['restore_model']:
@@ -98,20 +98,6 @@ class Autoencoder(object):
                     print("Variables restore Failed for " + domainString + ' AAE!')
                     pass
 
-
-    def load_learning_rate(self, dstring, learning_rate_params):
-        with open(dstring + '_aae_learning_rate_logs.csv', 'r+') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            lr_list = [entry for entry in reader]
-            lr = float(lr_list[-1][0])
-            if lr != 0.0:
-                learning_rate_params['learning_rate'] = lr
-
-                # erase old values from learning rate log files
-                # writer = csv.writer(csvfile, delimiter=',')
-                # writer.writerow([0.0])
-
-        return learning_rate_params
 
     def create_variables(self):
         for domain in self.domains:
@@ -185,22 +171,177 @@ class Autoencoder(object):
 
     def define_operations(self):
         self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
+
         self.prob = tf.placeholder_with_default(1.0, shape=())
 
-        self.X_encoded = self.encoder(self.X_data_placeholder)
-        X_reconstructed = self.decoder(self.X_encoded)  # Network prediction
+        Y = self.X_data_placeholder
 
-        # Create a scalar summary object for the encoder and decoder so it can be displayed
-        self.tf_encode_summary = tf.summary.scalar('loss', self.X_encoded)
-        self.tf_decode_summary = tf.summary.scalar('loss', X_reconstructed)
+        with tf.variable_scope(tf.get_variable_scope()):
+            self.encoder_output = self.encoder(Y)
+            self.decoder_output = self.decoder(self.encoder_output)
+
+        with tf.variable_scope(tf.get_variable_scope()):
+            self.d_real = self.discriminator(self.real_distribution)
+            self.d_fake = self.discriminator(self.encoder_output, reuse=True)
 
         # Autoencoder loss
-        self.train_loss = tf.reduce_mean(tf.pow(self.X_data_placeholder - X_reconstructed, 2))
+        self.autoencoder_loss = tf.reduce_mean(tf.square(self.X_data_placeholder - self.decoder_output))
+
+        # Discrimminator Loss
+        self.dc_loss_real = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.d_real), logits=self.d_real))
+        self.dc_loss_fake = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(self.d_fake), logits=self.d_fake))
+        self.dc_loss = self.dc_loss_fake + self.dc_loss_real
+
+        # Generator loss
+        self.generator_loss = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.d_fake), logits=self.d_fake))
+
+        all_variables = tf.trainable_variables()
+        self.dc_var = [var for var in all_variables if 'dc_' in var.name]
+        self.en_var = [var for var in all_variables if 'e_' in var.name]
+
+        # define learning rate decay method
+        self.global_step = tf.Variable(0, trainable=False, name='global_step')
+        self.learning_rate = get_learning_rate(self.cfg['learning_rate_method'],
+                                               self.global_step, self.learning_rate_params)
+
+        # define the optimization algorithm
+        opt_name = self.cfg['optimization_algorithm'].lower()
+        optimizer = get_optimizer(opt_name, self.learning_rate, self.optim_params)
+
+        # Optimizers
+        self.autoencoder_optimizer = optimizer.minimize(self.autoencoder_loss, global_step=self.global_step)
+        self.discriminator_optimizer = optimizer.minimize(self.dc_loss, var_list=self.dc_var, global_step=self.global_step)
+        self.generator_optimizer = optimizer.minimize(self.generator_loss, var_list=self.en_var, global_step=self.global_step)
+
+        # Saving the model
+        self.saver = tf.train.Saver()
+
+        init_op = tf.global_variables_initializer()
+        self.sess.run(init_op)
 
 
+
+    def save_variables(self):
+        print('save autoencoder')
+        shape_str = ''
+        for i in self.cfg['layers_shape']:
+            shape_str += str(i) + '_'
+
+        if self.cfg['multi_domain']:
+            domainString = 'multi_domain'
+        else:
+            domainString = self.cfg['domainString']
+
+        model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], domainString,
+                                  self.cfg['policyType'], str(self.cfg['model_id']),
+                                  shape_str[:-1])
+        '''model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.environment,
+                                  domainString, self.cfg['policyType'], str(self.cfg['model_id']),
+                                  shape_str[:-1])'''
+        if not os.path.exists(model_path):
+            os.makedirs(model_path)
+        checkpoint_path = os.path.join(model_path, 'autoencoder')
+
+        path = self.saver.save(self.sess, checkpoint_path)
+
+        return path
 
     def restore_variables(self):
-        pass
+        print('restore_variables')
+        saver = tf.train.Saver(tf.trainable_variables())
+
+        shape_str = ''
+        for i in self.cfg['layers_shape']:
+            shape_str += str(i) + '_'
+
+        model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.cfg['domainString'],
+                                  self.cfg['policyType'], str(self.cfg['model_id']),
+                                  shape_str[:-1])
+        '''model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.environment,
+                                          domainString, self.cfg['policyType'], str(self.cfg['model_id']),
+                                          shape_str[:-1])'''
+        if not os.path.exists(model_path):
+            print(model_path, "Does not exist")
+        ckpt = tf.train.get_checkpoint_state(model_path)
+        saver.restore(self.sess, ckpt.model_checkpoint_path)
+
+    """
+    save states in the buffer from every domain
+    """
+
+    def saveToStateBuffer(self, vector):
+        if self.trainable:
+            self.state_buffer.append(vector.reshape((1, -1)))
+
+    def checkReadyToTrain(self):
+        if len(self.state_buffer) >= self.batch_size:
+            return True
+        else:
+            return False
+
+    def getTrainBatch(self):
+        state_batch = np.concatenate(self.state_buffer[:self.batch_size], axis=0)
+        return state_batch
+
+    # todo: use more sample on the go
+    def resetStateBuffer(self):
+        self.state_buffer = self.state_buffer[self.batch_size:]
+
+    def loadEpisodes(self):
+        data = None
+        try:
+            print("Loading past experiences.")
+            data = np.load("episodes_log.csv")
+            print(data)
+        except:
+            print("FAILED: Loading past experiences.")
+            pass
+
+        if data is not None:
+            for state in data:
+                self.saveToStateBuffer(state)
+
+    def saveEpisodesToFile(self, saveEpisodes):
+        if saveEpisodes:
+            if os.path.isfile("episodes_log.csv"):
+                saved = np.loadtxt("episodes_log.csv", delimiter=',')
+                for state in self.state_buffer:
+                    np.append(saved, state)
+                np.savetxt("episodes_log.csv", saved, delimiter=",")
+            else:
+                np.savetxt("episodes_log.csv", self.state_buffer, delimiter=",")
+
+        print(np.loadtxt("episodes_log.csv", delimiter=','))
+
+    # not working properly yet
+    # todo:fix
+    def get_tensorflow_device(self):
+        if self.cfg['training_device'] == 'cpu':
+            return '/cpu:0'
+        else:
+            return '/gpu:0'
+
+    def save_learning_rate(self, dstring, learning_rate):
+        with open(dstring + '_ae_learning_rate_logs.csv', 'a+') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            writer.writerow([learning_rate])
+
+    def load_learning_rate(self, dstring, learning_rate_params):
+        with open(dstring + '_ae_learning_rate_logs.csv', 'r+') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            lr_list = [entry for entry in reader]
+            lr = float(lr_list[-1][0])
+            if lr != 0.0:
+                learning_rate_params['learning_rate'] = lr
+
+                # erase old values from learning rate log files
+                # writer = csv.writer(csvfile, delimiter=',')
+                # writer.writerow([0.0])
+
+        return learning_rate_params
 
 
 
