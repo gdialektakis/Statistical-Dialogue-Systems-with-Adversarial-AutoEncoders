@@ -1,1 +1,8 @@
-This is my work for my diploma-thesis. It's about representing Belief State Space with Adversarial Autoencoders in a Statistical Dialogue System. For that reason, Pydial framework is used.
+This is my work for my diploma-thesis. 
+It's about representing Belief State Space with Adversarial Autoencoders in a Statistical Dialogue System. For that reason, Pydial framework is used.
+
+-- For more information on how to download and run Pydial you can check the following link:
+http://www.camdial.org/pydial/
+
+-- Paper for Adversarial Autoencoders:
+https://arxiv.org/abs/1511.05644
