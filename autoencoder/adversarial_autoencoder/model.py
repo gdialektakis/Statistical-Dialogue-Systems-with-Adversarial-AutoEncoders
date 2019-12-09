@@ -171,6 +171,7 @@ class Autoencoder(object):
 
     def define_operations(self):
         self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
+        self.real_distribution = tf.placeholder(dtype=tf.float32, shape=[None, self.encode_dim], name='Real_distribution')
 
         self.prob = tf.placeholder_with_default(1.0, shape=())
 
@@ -182,7 +183,7 @@ class Autoencoder(object):
 
         with tf.variable_scope(tf.get_variable_scope()):
             self.d_real = self.discriminator(self.real_distribution)
-            self.d_fake = self.discriminator(self.encoder_output, reuse=True)
+            self.d_fake = self.discriminator(self.encoder_output, reuse=True)  ### We need to check reuse = True??
 
         # Autoencoder loss
         self.autoencoder_loss = tf.reduce_mean(tf.square(self.X_data_placeholder - self.decoder_output))
@@ -219,10 +220,43 @@ class Autoencoder(object):
         # Saving the model
         self.saver = tf.train.Saver()
 
-        init_op = tf.global_variables_initializer()
+        init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
         self.sess.run(init_op)
 
+    def train(self, input_x):
+        if self.trainable:
+            a_mean_loss = 0
+            d_mean_loss = 0
+            g_mean_loss = 0
+            for _ in range(self.epochs):
+                z_real_dist = np.random.randn(self.encode_dim) * 5.
+                tmp_a_mean_loss, _ = self.sess.run(self.autoencoder_optimizer, feed_dict={self.X_data_placeholder: input_x})
+                tmp_d_mean_loss, _ = self.sess.run(self.discriminator_optimizer,
+                                        feed_dict={self.X_data_placeholder: input_x, self.real_distribution: z_real_dist})
+                tmp_g_mean_loss, _ = self.sess.run(self.generator_optimizer, feed_dict={self.X_data_placeholder: input_x})
+                # Computing losses
+                a_mean_loss += tmp_a_mean_loss
+                d_mean_loss += tmp_d_mean_loss
+                g_mean_loss += tmp_g_mean_loss
 
+            a_mean_loss = float(a_mean_loss) / float(self.epochs)
+            d_mean_loss = float(d_mean_loss) / float(self.epochs)
+            g_mean_loss = float(g_mean_loss) / float(self.epochs)
+
+            # toDo: save mean loss for graph plot
+            print('Autoencoder ' + self.domainString + ' mean loss:', a_mean_loss)
+            print('Disciminator ' + self.domainString + ' mean loss:', d_mean_loss)
+            print('Generator ' + self.domainString + ' mean loss:', g_mean_loss)
+            if math.isnan(a_mean_loss):
+                print('Autoencoder returned cost Nan')
+            lr = (self.sess.run(self.learning_rate))
+            print("Learning rate: %.10f" % lr)
+            self.save_learning_rate(dstring=self.domainString, learning_rate=lr)
+
+    def encode(self, X_data):
+        X_encoded_np = self.sess.run(self.encoder_output, feed_dict={self.X_data_placeholder: X_data, self.prob: 1.0})
+
+        return X_encoded_np
 
     def save_variables(self):
         print('save autoencoder')

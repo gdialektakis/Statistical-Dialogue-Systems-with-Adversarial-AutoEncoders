@@ -88,6 +88,8 @@ class PolicyManager(object):
             from autoencoder.dense_multi.model import Autoencoder
         elif autoencoder_type == 'cnn_multi':
             from autoencoder.cnn_multi.model import Autoencoder
+        elif autoencoder_type == 'adversarial':
+            from autoencoder.adversarial_autoencoder.model import Autoencoder
         else:
             from autoencoder.dense_multi.model import Autoencoder
 
