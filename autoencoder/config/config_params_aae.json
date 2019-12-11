@@ -13,7 +13,7 @@
     "batch_size"             : 900,
 
     "layers_shape"           : [-1, 200, 100, 50, 30],
-    "discriminator_layers"   : [-1, 100, 100, 1],
+    "discriminator_layers"   : [-1, 100, 100, 100, 1],
 
     "learning_rate_method"   : "exponential",
     "optimization_algorithm" : "adam",

@@ -13,7 +13,7 @@ __author__ = """Vassilis Tsiaras (tsiaras@csd.uoc.gr)"""
 #    Computer Science Department, University of Crete.
 
 def get_configuration(domainString, policyType):
-    config_filename = os.path.join('.', 'autoencoder', 'config', '   "latent_size"            : 30,.json')
+    config_filename = os.path.join('.', 'autoencoder', 'config',  'config_params_aae.json')
     with open(config_filename, 'r') as f:
         cfg = json.load(f)
 

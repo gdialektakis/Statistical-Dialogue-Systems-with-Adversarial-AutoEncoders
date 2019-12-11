@@ -252,6 +252,8 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
             from autoencoder.dense_multi.model import Autoencoder
         elif autoencoder_type == 'sparse':
             from autoencoder.dense_sparse.model import Autoencoder
+        elif autoencoder_type == 'adversarial':
+            from autoencoder.adversarial_autoencoder.model import Autoencoder
         else:
             from autoencoder.dense_multi.model import Autoencoder
 

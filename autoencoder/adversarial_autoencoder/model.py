@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 __author__ = """George Dialektakis (geo4diale@gmail.com)"""
+
 #    George Dialektakis <geo4diale@gmail.com>
 #    Computer Science Department, University of Crete.
 
@@ -16,6 +17,7 @@ from lib.optimizers import get_learning_rate, get_optimizer
 from lib.precision import _FLOATX
 import numpy as np
 import csv
+
 
 # def get_weight_variable(name, shape=None, initializer=tf.contrib.layers.xavier_initializer_conv2d()):
 #     if shape is None:
@@ -41,7 +43,8 @@ def dense(x, n1, n2, name):
     :return: tensor with shape [batch_size, n2]
     """
     with tf.variable_scope(name, reuse=None):
-        weights = tf.get_variable("weights", shape=[n1, n2], initializer=tf.random_normal_initializer(mean=0., stddev=0.01))
+        weights = tf.get_variable("weights", shape=[n1, n2],
+                                  initializer=tf.random_normal_initializer(mean=0., stddev=0.01))
         out = tf.matmul(x, weights)
         return out
 
@@ -55,7 +58,7 @@ class Autoencoder(object):
     def __init__(self, domainString, policyType, variable_scope_name):
         self.cfg, self.learning_rate_params, self.optim_params = get_configuration(domainString, policyType)
         cfg = self.cfg
-        #self.l2 = float(cfg['l2'])
+        # self.l2 = float(cfg['l2'])
         self.layers_shape = cfg['layers_shape']
         self.n_layers = len(self.layers_shape) - 1
         self.input_dim = cfg['input_dim']  # self.layers_shape[0]
@@ -87,7 +90,7 @@ class Autoencoder(object):
         # device = self.get_tensorflow_device()
         # with tf.device(device):
         with tf.variable_scope("autoencoder_" + variable_scope_name, reuse=tf.AUTO_REUSE):
-            #self.create_variables()
+            # self.create_variables()
             self.define_operations()
 
             if cfg['restore_model']:
@@ -113,15 +116,15 @@ class Autoencoder(object):
         :return: tensor which is the hidden latent variable of the autoencoder.
         """
         with tf.variable_scope("Encoder", reuse=tf.AUTO_REUSE):
-
-            if self.n_layers == 3:
+            if self.n_layers == 4:
                 input_layer = tf.nn.tanh(dense(X, self.input_dim, self.layers_shape[1], 'e_input_layer'))
                 input_layer = tf.nn.dropout(input_layer, keep_prob=self.prob)
                 e_dense1 = tf.nn.tanh(dense(input_layer, self.layers_shape[1], self.layers_shape[2], 'e_dense1'))
                 e_dense1 = tf.nn.dropout(e_dense1, keep_prob=self.prob)
                 e_dense2 = tf.nn.tanh(dense(e_dense1, self.layers_shape[2], self.layers_shape[3], 'e_dense2'))
                 e_dense2 = tf.nn.dropout(e_dense2, keep_prob=self.prob)
-                latent_variable = tf.nn.tanh(dense(e_dense2, self.layers_shape[3], self.layers_shape[4], 'e_latent_variable'))
+                latent_variable = tf.nn.tanh(
+                    dense(e_dense2, self.layers_shape[3], self.layers_shape[4], 'e_latent_variable'))
                 latent_variable = tf.nn.dropout(latent_variable, keep_prob=self.prob)
 
             return latent_variable
@@ -134,9 +137,8 @@ class Autoencoder(object):
         :return: tensor which should ideally be the input given to the encoder.
         """
         with tf.variable_scope("Decoder", reuse=tf.AUTO_REUSE):
-            X = Y
-            if self.n_layers == 3:
-                d_dense1 = tf.nn.tanh(dense(X, self.layers_shape[4], self.layers_shape[3], 'd_dense1'))
+            if self.n_layers == 4:
+                d_dense1 = tf.nn.tanh(dense(Y, self.layers_shape[4], self.layers_shape[3], 'd_dense1'))
                 d_dense2 = tf.nn.tanh(dense(d_dense1, self.layers_shape[3], self.layers_shape[2], 'd_dense2'))
                 d_dense3 = tf.nn.tanh(dense(d_dense2, self.layers_shape[2], self.layers_shape[1], 'd_dense3'))
                 output = tf.nn.tanh(dense(d_dense3, self.layers_shape[1], self.input_dim, 'd_output'))
@@ -162,7 +164,8 @@ class Autoencoder(object):
 
     def define_operations(self):
         self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
-        self.real_distribution = tf.placeholder(dtype=tf.float32, shape=[None, self.encode_dim], name='Real_distribution')
+        self.real_distribution = tf.placeholder(dtype=tf.float32, shape=[None, self.encode_dim],
+                                                name='Real_distribution')
 
         self.prob = tf.placeholder_with_default(1.0, shape=())
 
@@ -179,7 +182,7 @@ class Autoencoder(object):
         # Autoencoder loss
         self.autoencoder_loss = tf.reduce_mean(tf.square(self.X_data_placeholder - self.decoder_output))
 
-        # Discrimminator Loss
+        # Discriminator Loss
         self.dc_loss_real = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.d_real), logits=self.d_real))
         self.dc_loss_fake = tf.reduce_mean(
@@ -190,6 +193,7 @@ class Autoencoder(object):
         self.generator_loss = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.d_fake), logits=self.d_fake))
 
+        # collect only Discriminator's and Generator's variables as required
         all_variables = tf.trainable_variables()
         self.dc_var = [var for var in all_variables if 'dc_' in var.name]
         self.en_var = [var for var in all_variables if 'e_' in var.name]
@@ -199,14 +203,17 @@ class Autoencoder(object):
         self.learning_rate = get_learning_rate(self.cfg['learning_rate_method'],
                                                self.global_step, self.learning_rate_params)
 
+
         # define the optimization algorithm
         opt_name = self.cfg['optimization_algorithm'].lower()
         optimizer = get_optimizer(opt_name, self.learning_rate, self.optim_params)
 
         # Optimizers
         self.autoencoder_optimizer = optimizer.minimize(self.autoencoder_loss, global_step=self.global_step)
-        self.discriminator_optimizer = optimizer.minimize(self.dc_loss, var_list=self.dc_var, global_step=self.global_step)
-        self.generator_optimizer = optimizer.minimize(self.generator_loss, var_list=self.en_var, global_step=self.global_step)
+        self.discriminator_optimizer = optimizer.minimize(self.dc_loss, var_list=self.dc_var,
+                                                          global_step=self.global_step)
+        self.generator_optimizer = optimizer.minimize(self.generator_loss, var_list=self.en_var,
+                                                      global_step=self.global_step)
 
         # Saving the model
         self.saver = tf.train.Saver()
@@ -220,11 +227,14 @@ class Autoencoder(object):
             d_mean_loss = 0
             g_mean_loss = 0
             for _ in range(self.epochs):
-                z_real_dist = np.random.randn(self.encode_dim) * 5.  ## check how to generate the desired prior distribution
-                tmp_a_mean_loss, _ = self.sess.run(self.autoencoder_optimizer, feed_dict={self.X_data_placeholder: input_x})
-                tmp_d_mean_loss, _ = self.sess.run(self.discriminator_optimizer,
-                                        feed_dict={self.X_data_placeholder: input_x, self.real_distribution: z_real_dist})
-                tmp_g_mean_loss, _ = self.sess.run(self.generator_optimizer, feed_dict={self.X_data_placeholder: input_x})
+                z_real_dist = np.random.randn(1, self.encode_dim) * 5.  ## check how to generate the desired prior distribution
+                tmp_a_mean_loss, _ = self.sess.run([self.autoencoder_loss, self.autoencoder_optimizer],
+                                                   feed_dict={self.X_data_placeholder: input_x})
+                tmp_d_mean_loss, _ = self.sess.run([self.dc_loss, self.discriminator_optimizer],
+                                                   feed_dict={self.X_data_placeholder: input_x,
+                                                              self.real_distribution: z_real_dist})
+                tmp_g_mean_loss, _ = self.sess.run([self.generator_loss, self.generator_optimizer],
+                                                   feed_dict={self.X_data_placeholder: input_x})
                 # Computing losses
                 a_mean_loss += tmp_a_mean_loss
                 d_mean_loss += tmp_d_mean_loss
@@ -367,6 +377,3 @@ class Autoencoder(object):
                 # writer.writerow([0.0])
 
         return learning_rate_params
-
-
-
