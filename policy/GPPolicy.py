@@ -201,7 +201,7 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
             self.is_transfer = Settings.config.getboolean('exec_config', 'transfer')
 
         self.is_Single = False
-        if Settings.config.has_option('exec_config', 'single_autoencoder_type'):
+        if Settings.config.has_option('exec_config', 'autoencoder_type'):
             self.is_Single = True
 
         self.isAE = False
@@ -226,10 +226,13 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
         # Modifications for autoencoders | fotis
         self.dae = None
         self.transfer_autoencoder = None
+        self.aae = False
 
         if Settings.config.has_option('exec_config', 'autoencoder') and Settings.config.getboolean(
                 'exec_config', 'autoencoder'):
             autoencoder_type = Settings.config.get('exec_config', 'autoencoder_type')
+            if autoencoder_type == 'adversarial':
+                self.aae = True
             self.dae = self.initSingleAutoEncoder(domainString, autoencoder_type)
         # End
 
@@ -252,6 +255,8 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
             from autoencoder.dense_multi.model import Autoencoder
         elif autoencoder_type == 'sparse':
             from autoencoder.dense_sparse.model import Autoencoder
+        elif autoencoder_type == 'adversarial':
+            from autoencoder.adversarial_autoencoder.model import Autoencoder
         else:
             from autoencoder.dense_multi.model import Autoencoder
 
@@ -651,9 +656,11 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
         # Modifications for autoencoder
         # Transfered the state buffer in the autoencoder
         # transfer AE exists in PolicyManager.py
-	if self.isAE:
-            self.check_n_train_ae(episode)
-
+        if self.isAE:
+            if self.aae:
+                self.check_n_train_aae(episode)
+            else:
+                self.check_n_train_ae(episode)
         self.episodecount += 1
         # End of modifications 
 
@@ -752,6 +759,42 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
                                 print("Variables Save Failed!")
                                 pass
 
+        # gdiale
+    def check_n_train_aae(self, episode):
+        if self.learning:
+            # if not (type(episode).__module__ == np.__name__):
+            for i in range(len(episode.strace)):
+                if episode.atrace[i].toString() != 'TerminalGPAction':
+
+                    if self.is_Single:
+                        self.dae.saveToStateBuffer(episode.strace_clean[i].flatBeliefVec)
+
+                        if self.dae.checkReadyToTrain():
+                            state_clean_batch = self.dae.getTrainBatch()
+                            self.dae.train(state_clean_batch)
+                            # self.autoencoder.saveEpisodesToFile(self.save_episodes)
+                            self.dae.resetStateBuffer()
+                            try:
+                                path = self.dae.save_variables()
+                                # print("Variables Saved at: ", path)
+                            except:
+                                print("Variables Save Failed!")
+                                pass
+                    if self.is_transfer:
+                        # check if we use the AE in PolicyManager
+                        self.transfer_autoencoder.saveToStateBuffer(episode.strace_clean[i].flatBeliefVec)
+
+                        if self.transfer_autoencoder.checkReadyToTrain():
+                            state_clean_batch = self.transfer_autoencoder.getTrainBatch()
+                            self.transfer_autoencoder.train(state_clean_batch)
+                            # self.autoencoder.saveEpisodesToFile(self.save_episodes)
+                            self.transfer_autoencoder.resetStateBuffer()
+                            try:
+                                path = self.transfer_autoencoder.save_variables()
+                                # print("Variables Saved at: ", path)
+                            except:
+                                print("Variables Save Failed!")
+                                pass
 
     def _unabstract_dictionary(self):
         for i in range(len(self.learner.params['_dictionary'])):
@@ -1311,6 +1354,7 @@ class GPState(State):
                 # Modifications for AE
                 self.flatBeliefVec = np.array(flatten_belief(belief, domainUtil), dtype=np.float32)
                 self.beliefStateVec = autoencoder.encode(self.flatBeliefVec.reshape((1, -1))).reshape((-1,))
+                self.hello = True
                 # End of modifications
 
 

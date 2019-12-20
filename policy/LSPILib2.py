@@ -70,6 +70,7 @@ class BlockBasis(object):
         if action.actid > -1:
             base = action.actid * self.state_dim
             state_vector = belief.getStateVector() #encoded_state
+            #print(state_vector)
             phi[base:base + self.state_dim] = state_vector 
         else:
             phi[-1] = 1.0 # single bias
