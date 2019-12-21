@@ -157,7 +157,7 @@ class Autoencoder(object):
 
 
     def train(self, X):
-        kl = self.sess.run(self.kl,feed_dict={self.X_data_placeholder: X})
+        kl = self.sess.run(self.kl, feed_dict={self.X_data_placeholder: X})
         mean_loss, _ = self.sess.run([self.train_loss, self.update_ops], feed_dict={self.X_data_placeholder: X})
         print('Autoencoder mean loss:', mean_loss)
         if math.isnan(mean_loss):

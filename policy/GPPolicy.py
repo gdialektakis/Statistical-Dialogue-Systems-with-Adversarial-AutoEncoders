@@ -759,7 +759,7 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
                                 print("Variables Save Failed!")
                                 pass
 
-        # gdiale
+    # gdiale
     def check_n_train_aae(self, episode):
         if self.learning:
             # if not (type(episode).__module__ == np.__name__):
@@ -767,11 +767,11 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
                 if episode.atrace[i].toString() != 'TerminalGPAction':
 
                     if self.is_Single:
-                        self.dae.saveToStateBuffer(episode.strace_clean[i].flatBeliefVec)
+                        self.dae.saveToStateBuffer(episode.strace[i].flatBeliefVec)
 
                         if self.dae.checkReadyToTrain():
-                            state_clean_batch = self.dae.getTrainBatch()
-                            self.dae.train(state_clean_batch)
+                            state_batch = self.dae.getTrainBatch()
+                            self.dae.train(state_batch)
                             # self.autoencoder.saveEpisodesToFile(self.save_episodes)
                             self.dae.resetStateBuffer()
                             try:
@@ -782,11 +782,11 @@ class GPPolicy(Policy,PolicyCommittee.CommitteeMember):
                                 pass
                     if self.is_transfer:
                         # check if we use the AE in PolicyManager
-                        self.transfer_autoencoder.saveToStateBuffer(episode.strace_clean[i].flatBeliefVec)
+                        self.transfer_autoencoder.saveToStateBuffer(episode.strace[i].flatBeliefVec)
 
                         if self.transfer_autoencoder.checkReadyToTrain():
-                            state_clean_batch = self.transfer_autoencoder.getTrainBatch()
-                            self.transfer_autoencoder.train(state_clean_batch)
+                            state_batch = self.transfer_autoencoder.getTrainBatch()
+                            self.transfer_autoencoder.train(state_batch)
                             # self.autoencoder.saveEpisodesToFile(self.save_episodes)
                             self.transfer_autoencoder.resetStateBuffer()
                             try:

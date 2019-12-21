@@ -19,20 +19,6 @@ import numpy as np
 import csv
 
 
-# def get_weight_variable(name, shape=None, initializer=tf.contrib.layers.xavier_initializer_conv2d()):
-#     if shape is None:
-#         return tf.get_variable(name)
-#     else:
-#         return tf.get_variable(name, shape=shape, dtype=_FLOATX, initializer=initializer)
-#
-#
-# def get_bias_variable(name, shape=None, initializer=tf.constant_initializer(value=0.0, dtype=_FLOATX)):
-#     if shape is None:
-#         return tf.get_variable(name)
-#     else:
-#         return tf.get_variable(name, shape=shape, dtype=_FLOATX, initializer=initializer)
-
-
 def dense(x, n1, n2, name):
     """
     Used to create a dense layer.
@@ -50,10 +36,10 @@ def dense(x, n1, n2, name):
         return out
 
 
-"""
-Adversarial Autoencoder
-"""
 
+"""
+Denoising Adversarial Autoencoder
+"""
 
 class Autoencoder(object):
     def __init__(self, domainString, policyType, variable_scope_name):
@@ -97,10 +83,11 @@ class Autoencoder(object):
             if cfg['restore_model']:
                 try:
                     self.restore_variables()
-                    print("Variables restored for " + domainString + ' AAE ' + str(self.layers_shape))
+                    print("Variables restored for " + domainString + ' DAAE ' + str(self.layers_shape))
                 except:
-                    print("Variables restore Failed for " + domainString + ' AAE!')
+                    print("Variables restore Failed for " + domainString + ' DAAE!')
                     pass
+
 
     def encoder(self, X, reuse=False):
         """
@@ -158,6 +145,7 @@ class Autoencoder(object):
 
     def define_operations(self):
         self.X_data_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
+        self.X_data_clean_placeholder = tf.placeholder(dtype=_FLOATX, shape=[None, self.input_dim])
         self.real_distribution = tf.placeholder(dtype=tf.float32, shape=[None, self.encode_dim],
                                                 name='Real_distribution')
 
@@ -174,7 +162,7 @@ class Autoencoder(object):
             self.d_fake = self.discriminator(self.encoder_output, reuse=True)  ### We need to check reuse = True??
 
         # Autoencoder loss
-        self.autoencoder_loss = tf.reduce_mean(tf.square(self.X_data_placeholder - self.decoder_output))
+        self.autoencoder_loss = tf.reduce_mean(tf.square(self.X_data_clean_placeholder - self.decoder_output))
 
         # Discriminator Loss
         self.dc_loss_real = tf.reduce_mean(
@@ -214,160 +202,3 @@ class Autoencoder(object):
 
         init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
         self.sess.run(init_op)
-
-    def train(self, input_x):
-        if self.trainable:
-            a_mean_loss = 0
-            d_mean_loss = 0
-            g_mean_loss = 0
-            for _ in range(self.epochs):
-                z_real_dist = np.random.randn(1, self.encode_dim) * 5.  ## check how to generate the desired prior distribution
-                tmp_a_mean_loss, _ = self.sess.run([self.autoencoder_loss, self.autoencoder_optimizer],
-                                                   feed_dict={self.X_data_placeholder: input_x})
-                tmp_d_mean_loss, _ = self.sess.run([self.dc_loss, self.discriminator_optimizer],
-                                                   feed_dict={self.X_data_placeholder: input_x,
-                                                              self.real_distribution: z_real_dist})
-                tmp_g_mean_loss, _ = self.sess.run([self.generator_loss, self.generator_optimizer],
-                                                   feed_dict={self.X_data_placeholder: input_x})
-                # Computing losses
-                a_mean_loss += tmp_a_mean_loss
-                d_mean_loss += tmp_d_mean_loss
-                g_mean_loss += tmp_g_mean_loss
-
-            a_mean_loss = float(a_mean_loss) / float(self.epochs)
-            d_mean_loss = float(d_mean_loss) / float(self.epochs)
-            g_mean_loss = float(g_mean_loss) / float(self.epochs)
-
-            # toDo: save mean loss for graph plot
-            print('Autoencoder ' + self.domainString + ' mean loss:', a_mean_loss)
-            print('Disciminator ' + self.domainString + ' mean loss:', d_mean_loss)
-            print('Generator ' + self.domainString + ' mean loss:', g_mean_loss)
-            if math.isnan(a_mean_loss):
-                print('Autoencoder returned cost Nan')
-            lr = (self.sess.run(self.learning_rate))
-            print("Learning rate: %.10f" % lr)
-            self.save_learning_rate(dstring=self.domainString, learning_rate=lr)
-
-    def encode(self, X_data):
-        X_encoded_np = self.sess.run(self.encoder_output, feed_dict={self.X_data_placeholder: X_data, self.prob: 1.0})
-
-        return X_encoded_np
-
-    def save_variables(self):
-        print('save autoencoder')
-        shape_str = ''
-        for i in self.cfg['layers_shape']:
-            shape_str += str(i) + '_'
-
-        if self.cfg['multi_domain']:
-            domainString = 'multi_domain'
-        else:
-            domainString = self.cfg['domainString']
-
-        model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], domainString,
-                                  self.cfg['policyType'], str(self.cfg['model_id']),
-                                  shape_str[:-1])
-        '''model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.environment,
-                                  domainString, self.cfg['policyType'], str(self.cfg['model_id']),
-                                  shape_str[:-1])'''
-        if not os.path.exists(model_path):
-            os.makedirs(model_path)
-        checkpoint_path = os.path.join(model_path, 'autoencoder')
-
-        path = self.saver.save(self.sess, checkpoint_path)
-
-        return path
-
-    def restore_variables(self):
-        print('restore_variables')
-        saver = tf.train.Saver(tf.trainable_variables())
-
-        shape_str = ''
-        for i in self.cfg['layers_shape']:
-            shape_str += str(i) + '_'
-
-        model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.cfg['domainString'],
-                                  self.cfg['policyType'], str(self.cfg['model_id']),
-                                  shape_str[:-1])
-        '''model_path = os.path.join(self.cfg['base_dir'], self.cfg['saved_models_dir'], self.environment,
-                                          domainString, self.cfg['policyType'], str(self.cfg['model_id']),
-                                          shape_str[:-1])'''
-        if not os.path.exists(model_path):
-            print(model_path, "Does not exist")
-        ckpt = tf.train.get_checkpoint_state(model_path)
-        saver.restore(self.sess, ckpt.model_checkpoint_path)
-
-    """
-    save states in the buffer from every domain
-    """
-
-    def saveToStateBuffer(self, vector):
-        if self.trainable:
-            self.state_buffer.append(vector.reshape((1, -1)))
-
-    def checkReadyToTrain(self):
-        if len(self.state_buffer) >= self.batch_size:
-            return True
-        else:
-            return False
-
-    def getTrainBatch(self):
-        state_batch = np.concatenate(self.state_buffer[:self.batch_size], axis=0)
-        return state_batch
-
-    # todo: use more sample on the go
-    def resetStateBuffer(self):
-        self.state_buffer = self.state_buffer[self.batch_size:]
-
-    def loadEpisodes(self):
-        data = None
-        try:
-            print("Loading past experiences.")
-            data = np.load("episodes_log.csv")
-            print(data)
-        except:
-            print("FAILED: Loading past experiences.")
-            pass
-
-        if data is not None:
-            for state in data:
-                self.saveToStateBuffer(state)
-
-    def saveEpisodesToFile(self, saveEpisodes):
-        if saveEpisodes:
-            if os.path.isfile("episodes_log.csv"):
-                saved = np.loadtxt("episodes_log.csv", delimiter=',')
-                for state in self.state_buffer:
-                    np.append(saved, state)
-                np.savetxt("episodes_log.csv", saved, delimiter=",")
-            else:
-                np.savetxt("episodes_log.csv", self.state_buffer, delimiter=",")
-
-        print(np.loadtxt("episodes_log.csv", delimiter=','))
-
-    # not working properly yet
-    # todo:fix
-    def get_tensorflow_device(self):
-        if self.cfg['training_device'] == 'cpu':
-            return '/cpu:0'
-        else:
-            return '/gpu:0'
-
-    def save_learning_rate(self, dstring, learning_rate):
-        with open(dstring + '_ae_learning_rate_logs.csv', 'a+') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',')
-            writer.writerow([learning_rate])
-
-    def load_learning_rate(self, dstring, learning_rate_params):
-        with open(dstring + '_ae_learning_rate_logs.csv', 'r+') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            lr_list = [entry for entry in reader]
-            lr = float(lr_list[-1][0])
-            if lr != 0.0:
-                learning_rate_params['learning_rate'] = lr
-
-                # erase old values from learning rate log files
-                # writer = csv.writer(csvfile, delimiter=',')
-                # writer.writerow([0.0])
-
-        return learning_rate_params
