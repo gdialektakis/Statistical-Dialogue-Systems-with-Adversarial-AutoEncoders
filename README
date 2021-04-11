@@ -1,4 +1,4 @@
-This is my work for my diploma-thesis. 
+# Adversarial Learning in Statistical Dialogue Systems 
 It's about representing Belief State Space with Adversarial Autoencoders in a Statistical Dialogue System. 
 For that reason, Pydial framework is used.
 
@@ -7,3 +7,6 @@ http://www.camdial.org/pydial/
 
 -- Paper for Adversarial Autoencoders:
 https://arxiv.org/abs/1511.05644
+
+Thesis of this work:
+http://purl.tuc.gr/dl/dias/61C5E296-DF97-49E6-9F34-7719775576DA
